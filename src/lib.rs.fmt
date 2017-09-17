@@ -1,0 +1,86 @@
+#![crate_type = "lib"]
+#![crate_name = "hsv_rgb"]
+
+pub struct RGBColor {
+    pub r: u8,
+    pub g: u8,
+    pub b: u8,
+}
+
+pub struct HSVColor {
+    pub h: u8,
+    pub s: u8,
+    pub v: u8,
+}
+
+impl HSVColor {
+    pub fn new(h: u8, s: u8, v: u8) -> HSVColor {
+        HSVColor {
+            h: h,
+            s: s,
+            v: v,
+        }
+    }
+    #[allow(exceeding_bitshifts)]
+    pub fn to_rgb(&self) -> RGBColor {
+        let mut rgb = RGBColor::new(0, 0, 0);
+
+        if self.s == 0 {
+            rgb.r = self.v;
+            rgb.g = self.v;
+            rgb.b = self.v;
+            return rgb
+        }
+
+        let region: u8 = self.h / 43;
+        let remainder: u8 = (self.h - (region * 43)) * 6;
+
+        let p: u8 = (self.v * (255 - self.s)) >> 8;
+        let q: u8 = (self.v * (255 - ((self.s * remainder) >> 8))) >> 8;
+        let t: u8 = (self.v * (255 - ((self.s * (255 - remainder)) >> 8))) >> 8;
+
+        match region {
+            0 => {
+                rgb.r = self.v;
+                rgb.g = t;
+                rgb.b = p;
+            },
+            1 => {
+                rgb.r = q;
+                rgb.g = self.v;
+                rgb.b = p;
+            },
+            2 => {
+                rgb.r = p;
+                rgb.g = self.v;
+                rgb.b = t;
+            },
+            3 => {
+                rgb.r = p;
+                rgb.g = q;
+                rgb.b = self.v;
+            },
+            4 => {
+                rgb.r = t;
+                rgb.g = p;
+                rgb.b = self.v;
+            }
+            _ => {
+                rgb.r = self.v;
+                rgb.g = p;
+                rgb.b = q;
+            },
+        }
+        rgb
+    }
+}
+
+impl RGBColor {
+    pub fn new(r: u8, g: u8, b: u8) -> RGBColor {
+        RGBColor {
+            r: r,
+            g: g,
+            b: b,
+        }
+    }
+}
